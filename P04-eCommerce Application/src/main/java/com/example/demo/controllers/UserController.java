@@ -1,7 +1,8 @@
 package com.example.demo.controllers;
 
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,8 +21,9 @@ import com.example.demo.model.requests.CreateUserRequest;
 
 @RestController
 @RequestMapping("/api/user")
-@Slf4j
 public class UserController {
+
+	private final Logger logger = LoggerFactory.getLogger(UserController.class.getName());
 	
 	@Autowired
 	private UserRepository userRepository;
@@ -52,12 +54,14 @@ public class UserController {
 		user.setCart(cart);
 		if (createUserRequest.getPassword().length() < 7 ||
 					!createUserRequest.getPassword().equals(createUserRequest.getConfirmPassword())) {
-			log.error("Error with user password. Cannot create user {}", createUserRequest.getUsername());
+			logger.info("Error with user password. Cannot create user {}", createUserRequest.getUsername());
+			logger.info("[createUser successes] failures:{}", createUserRequest.getUsername());
 			return ResponseEntity.badRequest().build();
 		}
 
 		user.setPassword(bCryptPasswordEncoder.encode(createUserRequest.getPassword()));
 		userRepository.save(user);
+		logger.info("[createUser successes] failures:{}", createUserRequest.getUsername());
 		return ResponseEntity.ok(user);
 	}
 	

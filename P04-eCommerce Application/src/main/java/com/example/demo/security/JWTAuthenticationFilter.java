@@ -37,10 +37,9 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
   public Authentication attemptAuthentication(HttpServletRequest req,
       HttpServletResponse res) throws AuthenticationException {
     try {
-      logger.info("user authentication, ip:" + req.getRemoteAddr());
       User creds = new ObjectMapper()
           .readValue(req.getInputStream(), User.class);
-
+      logger.info("Authentication attempt, username:{}", creds.getUsername());
       return authenticationManager.authenticate(
           new UsernamePasswordAuthenticationToken(
               creds.getUsername(),
@@ -57,12 +56,17 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
       HttpServletResponse res,
       FilterChain chain,
       Authentication auth) throws IOException, ServletException {
-
-    logger.info("user authentication success, ip:" + req.getRemoteAddr());
     String token = JWT.create()
         .withSubject(((org.springframework.security.core.userdetails.User) auth.getPrincipal()).getUsername())
         .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
         .sign(HMAC512(SECRET.getBytes()));
+    logger.info("Authentication successful");
     res.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
+  }
+
+  @Override
+  protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+    logger.warn("Authentication failures");
+    super.unsuccessfulAuthentication(request, response, failed);
   }
 }
