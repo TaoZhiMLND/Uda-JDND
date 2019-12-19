@@ -1,5 +1,6 @@
 package com.example.demo.model.persistence;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -17,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "user")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
 
 	@Id

@@ -1,16 +1,19 @@
 package com.example.demo.security;
 
 
-import static org.junit.Assert.assertThat;
+
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import lombok.SneakyThrows;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockFilterConfig;
@@ -18,20 +21,19 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
+@SpringBootTest
 public class JWTAuthenticationFilterTest {
 
   @Autowired
   private AuthenticationManager authenticationManager;
 
-  @Before
+  @BeforeEach
   public void before() {
     SecurityContextHolder.clearContext();
   }
 
-  @After
+  @AfterEach
   public void after() {
     SecurityContextHolder.clearContext();
   }
