@@ -52,11 +52,11 @@ public class CartControllerTest {
   @Autowired
   private ObjectMapper objectMapper;
 
-/*  @Autowired
+  @Autowired
   private JacksonTester<LoginRequest> loginRequestjson;
 
   @Autowired
-  private JacksonTester<CreateUserRequest> createUserRequestjson;*/
+  private JacksonTester<CreateUserRequest> createUserRequestjson;
 
 
  /* @Autowired
@@ -77,7 +77,7 @@ public class CartControllerTest {
 
     MvcResult entityResult = mvc.perform(
         MockMvcRequestBuilders.post("/api/user/create")
-            .content(objectMapper.writeValueAsString(createUserRequest))
+            .content(createUserRequestjson.write(createUserRequest).getJson())
             .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk()).andReturn();
 
@@ -91,7 +91,7 @@ public class CartControllerTest {
     LoginRequest loginRequest = LoginRequest.builder().username("TaoZhi").password("abcdefg").build();
     MvcResult result = mvc
         .perform(MockMvcRequestBuilders.post("/login")
-            .content(objectMapper.writeValueAsString(loginRequest)))
+            .content(loginRequestjson.write(loginRequest).getJson()))
         .andExpect(status().isOk()).andReturn();
 
     //request.addParameter("Authorization", result.getResponse().getHeader("Authorization"));
