@@ -13,22 +13,24 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-@AutoConfigureJsonTesters
-public class CartControllerTest {
+class OrderControllerTest {
 
   @Mock private UserRepository userRepo;
 
@@ -72,8 +74,8 @@ public class CartControllerTest {
 
   @Test
   @SneakyThrows
-  @DisplayName("Test method to test addition add deletion of items in the cart")
-  public void testCartTcontroller() {
+  @DisplayName("Test method to test submission of order and history of submitted order")
+  public void testOrderController() {
     when(userRepo.findByUsername(Mockito.anyString())).thenReturn(user);
 
     ModifyCartRequest cartRequest =
@@ -90,53 +92,35 @@ public class CartControllerTest {
 
     mockMvc
         .perform(
-            MockMvcRequestBuilders.post("/api/cart/addToCart")
-                .content(objectMapper.writeValueAsString(cartRequest))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isForbidden());
-
-    cartRequest.setUsername("TaoZhiTest");
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.post("/api/cart/addToCart")
-                .content(objectMapper.writeValueAsString(cartRequest))
-                .header(HEADER_STRING, request.getParameter(HEADER_STRING))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound());
-
-    cartRequest.setUsername("TaoZhi");
-    cartRequest.setQuantity(-10);
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.post("/api/cart/addToCart")
-                .content(objectMapper.writeValueAsString(cartRequest))
+            MockMvcRequestBuilders.post("/api/order/submit/TaoZhi")
                 .header(HEADER_STRING, request.getParameter(HEADER_STRING))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    cartRequest.setQuantity(10);
-    cartRequest.setItemId(100L);
     mockMvc
         .perform(
-            MockMvcRequestBuilders.post("/api/cart/addToCart")
-                .content(objectMapper.writeValueAsString(cartRequest))
+            MockMvcRequestBuilders.post("/api/order/submit/TaoZhiTest")
                 .header(HEADER_STRING, request.getParameter(HEADER_STRING))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
 
-    cartRequest.setItemId(1L);
-
     mockMvc
         .perform(
-            MockMvcRequestBuilders.post("/api/cart/removeFromCart")
-                .content(objectMapper.writeValueAsString(cartRequest))
+            MockMvcRequestBuilders.get("/api/order/history/TaoZhi")
                 .header(HEADER_STRING, request.getParameter(HEADER_STRING))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andExpect(MockMvcResultMatchers.jsonPath("$[0]").exists());
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get("/api/order/history/TaoZhiTest")
+                .header(HEADER_STRING, request.getParameter(HEADER_STRING))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
   }
 }

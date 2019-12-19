@@ -1,6 +1,5 @@
 package com.example.demo.security;
 
-
 import static com.example.demo.security.SecurityConstants.SIGN_UP_URL;
 
 import org.springframework.context.annotation.Bean;
@@ -20,21 +19,29 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
   private UserDetailsServiceImpl userDetailsService;
   private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-  public WebSecurity(UserDetailsServiceImpl userDetailsService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+  public WebSecurity(
+      UserDetailsServiceImpl userDetailsService, BCryptPasswordEncoder bCryptPasswordEncoder) {
     this.userDetailsService = userDetailsService;
     this.bCryptPasswordEncoder = bCryptPasswordEncoder;
   }
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-    http.cors().and().csrf().disable().authorizeRequests()
-        .antMatchers(HttpMethod.POST, SIGN_UP_URL).permitAll()
-        .anyRequest().authenticated()
+    http.cors()
+        .and()
+        .csrf()
+        .disable()
+        .authorizeRequests()
+        .antMatchers(HttpMethod.POST, SIGN_UP_URL)
+        .permitAll()
+        .anyRequest()
+        .authenticated()
         .and()
         .addFilter(new JWTAuthenticationFilter(authenticationManager()))
         .addFilter(new JWTAuthenticationVerficationFilter(authenticationManager()))
         // this disables session creation on Spring Security
-        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
   }
 
   @Override

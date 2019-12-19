@@ -34,38 +34,38 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
   }
 
   @Override
-  public Authentication attemptAuthentication(HttpServletRequest req,
-      HttpServletResponse res) throws AuthenticationException {
+  public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res)
+      throws AuthenticationException {
     try {
-      User creds = new ObjectMapper()
-          .readValue(req.getInputStream(), User.class);
+      User creds = new ObjectMapper().readValue(req.getInputStream(), User.class);
       logger.info("Authentication attempt, username:{}", creds.getUsername());
       return authenticationManager.authenticate(
           new UsernamePasswordAuthenticationToken(
-              creds.getUsername(),
-              creds.getPassword(),
-              new ArrayList<>())
-      );
+              creds.getUsername(), creds.getPassword(), new ArrayList<>()));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
   @Override
-  protected void successfulAuthentication(HttpServletRequest req,
-      HttpServletResponse res,
-      FilterChain chain,
-      Authentication auth) throws IOException, ServletException {
-    String token = JWT.create()
-        .withSubject(((org.springframework.security.core.userdetails.User) auth.getPrincipal()).getUsername())
-        .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-        .sign(HMAC512(SECRET.getBytes()));
+  protected void successfulAuthentication(
+      HttpServletRequest req, HttpServletResponse res, FilterChain chain, Authentication auth)
+      throws IOException, ServletException {
+    String token =
+        JWT.create()
+            .withSubject(
+                ((org.springframework.security.core.userdetails.User) auth.getPrincipal())
+                    .getUsername())
+            .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+            .sign(HMAC512(SECRET.getBytes()));
     logger.info("Authentication successful");
     res.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
   }
 
   @Override
-  protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+  protected void unsuccessfulAuthentication(
+      HttpServletRequest request, HttpServletResponse response, AuthenticationException failed)
+      throws IOException, ServletException {
     logger.warn("Authentication failures");
     super.unsuccessfulAuthentication(request, response, failed);
   }

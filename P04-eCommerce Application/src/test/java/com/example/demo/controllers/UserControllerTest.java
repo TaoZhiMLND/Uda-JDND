@@ -1,6 +1,8 @@
 package com.example.demo.controllers;
 
 
+import static com.example.demo.security.SecurityConstants.HEADER_STRING;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -10,12 +12,16 @@ import com.example.demo.model.persistence.repositories.UserRepository;
 import com.example.demo.model.requests.CreateUserRequest;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Optional;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,17 +38,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @AutoConfigureMockMvc
 public class UserControllerTest {
 
-  @InjectMocks
-  private UserController userController;
-
   @Mock
   private UserRepository userRepo;
-
-  @Mock
-  private CartRepository cartRepo;
-
-  @Mock
-  private PasswordEncoder encoder;
 
   @Autowired
   private MockMvc mockMvc;
@@ -65,7 +62,7 @@ public class UserControllerTest {
     userRequest.setPassword("abcdefg");
     userRequest.setConfirmPassword("abcdefg");
 
-    MvcResult entityResult=mockMvc.perform(
+    MvcResult entityResult = mockMvc.perform(
         MockMvcRequestBuilders.post("/api/user/create")
             .content(objectMapper.writeValueAsString(userRequest))
             .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
@@ -74,20 +71,46 @@ public class UserControllerTest {
     user = objectMapper.readValue(entityResult.getResponse().getContentAsString(), User.class);
 
     MvcResult result = mockMvc
-        .perform(MockMvcRequestBuilders.post("/login").content(objectMapper.writeValueAsString(userRequest)))
+        .perform(MockMvcRequestBuilders.post("/login")
+            .content(objectMapper.writeValueAsString(userRequest)))
         .andExpect(status().isOk()).andReturn();
     request.addParameter("Authorization", result.getResponse().getHeader("Authorization"));
   }
 
   @Test
-  public void findById() {
-  }
+  @SneakyThrows
+  @DisplayName("Test method to test user fetching controllers using unique username and id")
+  public void testGetUserWithUsernameAndId() {
+    when(userRepo.findByUsername(Mockito.anyString())).thenReturn(user);
+    when(userRepo.findById(Mockito.anyLong())).thenReturn(Optional.ofNullable(user));
 
-  @Test
-  public void findByUserName() {
-  }
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/user/{username}", "TaoZhi")
+        .accept(MediaType.APPLICATION_JSON)
+        .header(HEADER_STRING, request.getParameter(HEADER_STRING)))
+        .andExpect(status().isOk());
 
-  @Test
-  public void createUser() {
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/user/{username}", "TaoZhi")
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/user/{username}", "TaoZhiTest")
+        .accept(MediaType.APPLICATION_JSON)
+        .header(HEADER_STRING, request.getParameter(HEADER_STRING)))
+        .andExpect(status().isNotFound());
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/user/id/{id}", user.getId())
+        .accept(MediaType.APPLICATION_JSON)
+        .header(HEADER_STRING, request.getParameter(HEADER_STRING)))
+        .andExpect(status().isOk());
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/user/id/{id}", user.getId())
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/user/id/{id}", 100L)
+        .accept(MediaType.APPLICATION_JSON)
+        .header(HEADER_STRING, request.getParameter(HEADER_STRING)))
+        .andExpect(status().isNotFound());
+
   }
 }

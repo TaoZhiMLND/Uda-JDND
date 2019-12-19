@@ -1,37 +1,31 @@
 package com.example.demo.controllers;
 
 import static com.example.demo.security.SecurityConstants.HEADER_STRING;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.demo.model.persistence.User;
-import com.example.demo.model.persistence.repositories.UserRepository;
 import com.example.demo.model.requests.CreateUserRequest;
-import com.example.demo.model.requests.ModifyCartRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-@AutoConfigureJsonTesters
-public class CartControllerTest {
-
-  @Mock private UserRepository userRepo;
-
+class ItemControllerTest {
   @Autowired private MockMvc mockMvc;
 
   @Autowired private ObjectMapper objectMapper;
@@ -72,17 +66,30 @@ public class CartControllerTest {
 
   @Test
   @SneakyThrows
-  @DisplayName("Test method to test addition add deletion of items in the cart")
-  public void testCartTcontroller() {
-    when(userRepo.findByUsername(Mockito.anyString())).thenReturn(user);
-
-    ModifyCartRequest cartRequest =
-        ModifyCartRequest.builder().itemId(1L).quantity(10).username("TaoZhi").build();
+  @DisplayName("Test method to get item by name or history get item by id")
+  public void testItemController() {
 
     mockMvc
         .perform(
-            MockMvcRequestBuilders.post("/api/cart/addToCart")
-                .content(objectMapper.writeValueAsString(cartRequest))
+            MockMvcRequestBuilders.get("/api/item")
+                .header(HEADER_STRING, request.getParameter(HEADER_STRING))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(3));
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get("/api/item/1")
+                .header(HEADER_STRING, request.getParameter(HEADER_STRING))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Round Widget"));
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get("/api/item/name/{name}", "iphone11")
                 .header(HEADER_STRING, request.getParameter(HEADER_STRING))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -90,53 +97,10 @@ public class CartControllerTest {
 
     mockMvc
         .perform(
-            MockMvcRequestBuilders.post("/api/cart/addToCart")
-                .content(objectMapper.writeValueAsString(cartRequest))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isForbidden());
-
-    cartRequest.setUsername("TaoZhiTest");
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.post("/api/cart/addToCart")
-                .content(objectMapper.writeValueAsString(cartRequest))
+            MockMvcRequestBuilders.get("/api/item/name/{name}", "MackBook pro 2020")
                 .header(HEADER_STRING, request.getParameter(HEADER_STRING))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
-
-    cartRequest.setUsername("TaoZhi");
-    cartRequest.setQuantity(-10);
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.post("/api/cart/addToCart")
-                .content(objectMapper.writeValueAsString(cartRequest))
-                .header(HEADER_STRING, request.getParameter(HEADER_STRING))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    cartRequest.setQuantity(10);
-    cartRequest.setItemId(100L);
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.post("/api/cart/addToCart")
-                .content(objectMapper.writeValueAsString(cartRequest))
-                .header(HEADER_STRING, request.getParameter(HEADER_STRING))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound());
-
-    cartRequest.setItemId(1L);
-
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.post("/api/cart/removeFromCart")
-                .content(objectMapper.writeValueAsString(cartRequest))
-                .header(HEADER_STRING, request.getParameter(HEADER_STRING))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
   }
 }

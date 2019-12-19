@@ -1,14 +1,8 @@
 package com.example.demo.security;
 
-
-
-
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import lombok.SneakyThrows;
-
-import org.aspectj.lang.annotation.After;
-import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,8 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @SpringBootTest
 public class JWTAuthenticationFilterTest {
 
-  @Autowired
-  private AuthenticationManager authenticationManager;
+  @Autowired private AuthenticationManager authenticationManager;
 
   @BeforeEach
   public void before() {
@@ -42,7 +35,7 @@ public class JWTAuthenticationFilterTest {
   @SneakyThrows
   public void doFilterInternal_shouldPopulateSecurityContext_whenTokenIsValid() {
 
-    String token = issueTokenForUser("john.doe");
+    String token = issueTokenForUser("TaoZhi");
     MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
     request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
 
@@ -56,10 +49,10 @@ public class JWTAuthenticationFilterTest {
     filter.destroy();
 
     /*assertThat(SecurityContextHolder.getContext().getAuthentication())
-        .satisfies(authentication -> {
-          assertThat(authentication).isNotNull();
-          assertThat(authentication.getName()).isEqualTo("john.doe");
-        });*/
+    .satisfies(authentication -> {
+      assertThat(authentication).isNotNull();
+      assertThat(authentication.getName()).isEqualTo("john.doe");
+    });*/
   }
 
   private String issueTokenForUser(String username) {

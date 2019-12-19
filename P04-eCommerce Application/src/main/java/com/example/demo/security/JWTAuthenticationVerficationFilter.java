@@ -24,9 +24,9 @@ public class JWTAuthenticationVerficationFilter extends BasicAuthenticationFilte
   }
 
   @Override
-  protected void doFilterInternal(HttpServletRequest req,
-      HttpServletResponse res,
-      FilterChain chain) throws IOException, ServletException {
+  protected void doFilterInternal(
+      HttpServletRequest req, HttpServletResponse res, FilterChain chain)
+      throws IOException, ServletException {
     String header = req.getHeader(HEADER_STRING);
 
     if (header == null || !header.startsWith(TOKEN_PREFIX)) {
@@ -44,10 +44,11 @@ public class JWTAuthenticationVerficationFilter extends BasicAuthenticationFilte
     String token = request.getHeader(HEADER_STRING);
     if (token != null) {
       // parse the token.
-      String user = JWT.require(Algorithm.HMAC512(SECRET.getBytes()))
-          .build()
-          .verify(token.replace(TOKEN_PREFIX, ""))
-          .getSubject();
+      String user =
+          JWT.require(Algorithm.HMAC512(SECRET.getBytes()))
+              .build()
+              .verify(token.replace(TOKEN_PREFIX, ""))
+              .getSubject();
 
       if (user != null) {
         return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
@@ -56,5 +57,4 @@ public class JWTAuthenticationVerficationFilter extends BasicAuthenticationFilte
     }
     return null;
   }
-
 }
