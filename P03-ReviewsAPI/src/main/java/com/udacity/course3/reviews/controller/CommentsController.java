@@ -1,5 +1,11 @@
 package com.udacity.course3.reviews.controller;
 
+import com.udacity.course3.reviews.entity.Comment;
+import com.udacity.course3.reviews.entity.Review;
+import com.udacity.course3.reviews.repository.CommentRepository;
+import com.udacity.course3.reviews.repository.ReviewRepository;
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +20,15 @@ import java.util.List;
 @RequestMapping("/comments")
 public class CommentsController {
 
-    // TODO: Wire needed JPA repositories here
+    // DONE: Wire needed JPA repositories here
+    private final CommentRepository commentRepo;
+    private final ReviewRepository reviewRepo;
+
+    public CommentsController(
+        CommentRepository commentRepo, ReviewRepository reviewRepo) {
+        this.commentRepo = commentRepo;
+        this.reviewRepo = reviewRepo;
+    }
 
     /**
      * Creates a comment for a review.
@@ -27,8 +41,14 @@ public class CommentsController {
      * @param reviewId The id of the review.
      */
     @RequestMapping(value = "/reviews/{reviewId}", method = RequestMethod.POST)
-    public ResponseEntity<?> createCommentForReview(@PathVariable("reviewId") Integer reviewId) {
-        throw new HttpServerErrorException(HttpStatus.NOT_IMPLEMENTED);
+    public ResponseEntity<?> createCommentForReview(@PathVariable("reviewId") Long reviewId,
+        @RequestBody Comment comment) {
+        Optional<Review> review = reviewRepo.findById(reviewId);
+        if (!review.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        commentRepo.save(comment);
+        return ResponseEntity.status(HttpStatus.CREATED).body(comment);
     }
 
     /**
@@ -41,7 +61,8 @@ public class CommentsController {
      * @param reviewId The id of the review.
      */
     @RequestMapping(value = "/reviews/{reviewId}", method = RequestMethod.GET)
-    public List<?> listCommentsForReview(@PathVariable("reviewId") Integer reviewId) {
-        throw new HttpServerErrorException(HttpStatus.NOT_IMPLEMENTED);
+    public List<?> listCommentsForReview(@PathVariable("reviewId") Long reviewId) {
+        List<Comment> comments = commentRepo.findByReviewId(reviewId);
+        return comments;
     }
 }
