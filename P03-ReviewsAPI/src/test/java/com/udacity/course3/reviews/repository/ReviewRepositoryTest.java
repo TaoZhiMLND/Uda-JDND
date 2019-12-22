@@ -1,13 +1,14 @@
 package com.udacity.course3.reviews.repository;
 
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import com.udacity.course3.reviews.entity.Comment;
+import com.udacity.course3.reviews.entity.Product;
 import com.udacity.course3.reviews.entity.Review;
 import java.util.List;
-import javax.persistence.EntityManager;
-import javax.sql.DataSource;
+import java.util.Optional;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,20 +16,23 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
+
+/**
+ * TESTS FOR `ReviewRepository`,`CommentRepository`,`ProductRepository`.
+ *
+ * @author TaoZhi
+ * @version 1.0
+ * @date 2019/12/22 12:03
+ **/
 @DataJpaTest
 @RunWith(SpringRunner.class)
 public class ReviewRepositoryTest {
 
-  @Autowired private DataSource dataSource;
-  @Autowired private JdbcTemplate jdbcTemplate;
-  @Autowired private EntityManager entityManager;
-  @Autowired private TestEntityManager testEntityManager;
   @Autowired private ReviewRepository reviewRepository;
   @Autowired private CommentRepository commentRepository;
+  @Autowired private ProductRepository productRepository;
 
   @Before
   public void init() {
@@ -45,25 +49,28 @@ public class ReviewRepositoryTest {
 
   @Test
   public void injectedComponentsAreNotNull(){
-    assertThat(dataSource, CoreMatchers.notNullValue());
-    assertThat(jdbcTemplate, CoreMatchers.notNullValue());
-    assertThat(entityManager, CoreMatchers.notNullValue());
-    assertThat(testEntityManager, CoreMatchers.notNullValue());
     assertThat(reviewRepository, CoreMatchers.notNullValue());
     assertThat(commentRepository, CoreMatchers.notNullValue());
+    assertThat(productRepository, CoreMatchers.notNullValue());
   }
 
   @Test
-  public void findByProductId() {
+  public void findReviewsByProductId() {
     List<Review> reviews = reviewRepository.findByProductId(1L);
     Assert.assertNotNull(reviews);
   }
 
-
-
   @Test
-  public void findByReviewId() {
+  public void findCommentsByReviewId() {
     List<Comment> comments = commentRepository.findByReviewId(1L);
     Assert.assertNotNull(comments);
+
+  }
+
+  @Test
+  public void findProductById() {
+    Optional<Product> product = productRepository.findById(1L);
+    Assert.assertTrue(product.isPresent());
+    Assert.assertThat(product.get().getName(), is("SpringBoot GuideBook"));
   }
 }
