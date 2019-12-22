@@ -2,7 +2,9 @@ package com.udacity.course3.reviews.controller;
 
 import com.udacity.course3.reviews.entity.Product;
 import com.udacity.course3.reviews.entity.Review;
+import com.udacity.course3.reviews.entity.mongo.ReviewDoc;
 import com.udacity.course3.reviews.repository.ProductRepository;
+import com.udacity.course3.reviews.repository.mongo.ReviewMongoRepository;
 import com.udacity.course3.reviews.repository.ReviewRepository;
 import java.util.List;
 import java.util.Optional;
@@ -23,11 +25,14 @@ public class ReviewsController {
   // DONE: Wire JPA repositories here
   private final ProductRepository productRepo;
   private final ReviewRepository reviewRepo;
+  private final ReviewMongoRepository reviewMongoRepo;
 
   public ReviewsController(ProductRepository productRepo,
-      ReviewRepository reviewRepo) {
+      ReviewRepository reviewRepo,
+      ReviewMongoRepository reviewMongoRepo) {
     this.productRepo = productRepo;
     this.reviewRepo = reviewRepo;
+    this.reviewMongoRepo = reviewMongoRepo;
   }
 
   /**
@@ -47,6 +52,9 @@ public class ReviewsController {
       return ResponseEntity.notFound().build();
     }
     reviewRepo.save(review);
+    ReviewDoc reviewDoc = new ReviewDoc();
+    reviewDoc.setContent(review.getContent());
+    reviewMongoRepo.save(reviewDoc);
     return ResponseEntity.status(HttpStatus.CREATED).body(review);
   }
 
@@ -59,6 +67,7 @@ public class ReviewsController {
   @RequestMapping(value = "/reviews/products/{productId}", method = RequestMethod.GET)
   public ResponseEntity<List<?>> listReviewsForProduct(@PathVariable("productId") Long productId) {
     List<Review> reviews = reviewRepo.findByProductId(productId);
-    return ResponseEntity.ok(reviews);
+    List<ReviewDoc> reviewDocs = reviewMongoRepo.findByProductId(productId);
+    return ResponseEntity.ok(reviewDocs);
   }
 }

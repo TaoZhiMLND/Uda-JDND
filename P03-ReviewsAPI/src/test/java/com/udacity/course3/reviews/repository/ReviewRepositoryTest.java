@@ -34,6 +34,7 @@ public class ReviewRepositoryTest {
   @Autowired private CommentRepository commentRepository;
   @Autowired private ProductRepository productRepository;
 
+
   @Before
   public void init() {
     Review review = new Review();
