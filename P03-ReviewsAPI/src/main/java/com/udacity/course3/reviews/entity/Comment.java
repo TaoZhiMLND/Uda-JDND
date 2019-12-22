@@ -12,6 +12,13 @@ import javax.persistence.Table;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
+/**
+ * Comment Entity.
+ *
+ * @author TaoZhi
+ * @version 1.0
+ * @date 2019/12/22 12:03
+ **/
 @Data
 @Entity
 @Table(name = "comment")
