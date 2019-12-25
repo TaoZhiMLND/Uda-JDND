@@ -1,6 +1,5 @@
 package com.udacity.course3.reviews.entity.mongo;
 
-import com.udacity.course3.reviews.entity.Comment;
 import java.util.List;
 import javax.persistence.Id;
 import lombok.Data;
@@ -18,11 +17,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class ReviewDoc {
 
   @Id
-  private Long id;
+  private String id;
 
   private String content;
 
-  private Long productId;
-
-  private List<Comment> comments;
+  private List<String> comments;
 }

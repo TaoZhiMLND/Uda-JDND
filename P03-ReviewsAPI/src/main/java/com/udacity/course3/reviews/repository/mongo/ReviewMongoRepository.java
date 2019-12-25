@@ -1,6 +1,5 @@
 package com.udacity.course3.reviews.repository.mongo;
 
-import com.udacity.course3.reviews.entity.Review;
 import com.udacity.course3.reviews.entity.mongo.ReviewDoc;
 import java.util.List;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -14,7 +13,7 @@ import org.springframework.stereotype.Repository;
  * @date 2019/12/22 18:47
  **/
 @Repository
-public interface ReviewMongoRepository extends MongoRepository<ReviewDoc, Long> {
+public interface ReviewMongoRepository extends MongoRepository<ReviewDoc, String> {
 
-  List<ReviewDoc> findByProductId(Long productId);
+  List<ReviewDoc> findByIdIn(List<String> reviewIds);
 }
